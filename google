@@ -8,6 +8,7 @@ my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
 # yes you can use double quotes.... (if your shell didn't remove them) 
 # the command will open browser with the correct google url, in order to show search results
 # no arguments should result in an error
+# copyright 2020 https://github.com/kanliot Apache 2.0 license 
 
 my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
 $browser = "firefox" unless $browser;  # use "firefox" if not set

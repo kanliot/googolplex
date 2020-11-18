@@ -22,6 +22,8 @@
 # 1 to 3 are working if bash snippet is passed as first argument as string, with quoting already done.
 # kitty launching works if this script's $0 contains /kitty/ 
 
+# copyright 2020 https://github.com/kanliot Apache 2.0 license 
+
 
 
 
