@@ -1,0 +1,62 @@
+#!/usr/bin/perl -CA
+
+# rxft or kittyft ... launch terminal with bash script fonts resized or w/e.
+
+# $1 is always size in points
+# $2 is always command to run (can be exported function, but not normal function) 
+# $3... arguments to the command
+
+# lets say i want one window to be less 'filename with spaces'
+# 	and a second window to be bash alarm;bash bell 
+# i don't see a consistent way to automatically handle both...  in one, the command is multiple arguments, in another the command is a bash program
+# i guess you could grep for || && ; 
+# but no, you'd still push back the problem if you needed to quote shit or not
+
+# so really 3 modes: 
+# 1. bash snippet
+# program that needs bash to run
+# program that doesn't need bash 
+# plus... ad-hoc bash snippets that idiots don't think need to be quoted.
+# so four modes... 
+
+# 1 to 3 are working if bash snippet is passed as first argument as string, with quoting already done.
+# kitty launching works if this script's $0 contains /kitty/ 
+
+
+
+
+# this program runs rxvt with a font size, or the default font size 
+# got really tired of trying to shellquote arguments $2 to $N in bash 
+# yes you can write this in bash... but ^^
+
+#cw3m () {  sleep .1;stty cols 47 ;zcat "$@"|w3m -T text/html;}
+
+
+use warnings; use strict; 
+my $points = 17; 
+
+use Scalar::Util qw(looks_like_number);
+if (looks_like_number $ARGV[0]) {
+	$points = shift;
+}
+my @out;
+
+
+# huh snippets as first argument actually work now, since first arg is unquoted. 
+if (@ARGV) { 
+    sub shellquote { join ' ', map  "'" . s/'/'\\''/gr . "'", @_; } # returns all args as single spaced quoted string 
+#	@ARGV = map( shellquote, @ARGV) ;
+	my $sh = shift . " " . # problems with aliases if first arg is quoted
+	shellquote @ARGV;
+	@out=( '-e', 'bash', '-ic', $sh); # yes aliases work with -i 
+} 
+
+if (!fork) { 
+	$_ = $0;
+	if (/kitty/) {
+		exec #'commandline.pl', 
+		'kitty', qw( -o), "font_size=$points", @out; 
+	}
+	exec #'commandline.pl', 
+	'rxvt','-fn', 'xft:Droid Sans Mono Slashed for Powerline:size='.$points, '-name', 'rxvt_max', @out; 
+}

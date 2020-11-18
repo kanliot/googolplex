@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+
+### call this command with a list of words to pass to google
+my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
+# choose browser to open by setting this environmental variable in your CLI:
+# BROWSER=firefox
+
+# yes you can use double quotes.... (if your shell didn't remove them) 
+# the command will open browser with the correct google url, in order to show search results
+# no arguments should result in an error
+
+my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
+$browser = "firefox" unless $browser;  # use "firefox" if not set
+
+my $needs_terminal = $browser =~ /lynx|links|w3m/;
+my @term; 
+if ($needs_terminal) {  # use the rxft to launch lynx
+	@term = "rxft"; 
+}
+
+sub check_exists_command { 
+	my $check = `sh -c 'command -v $_[0]'`; 
+	return $check;
+}
+sub urlencode2 {
+    my $s = shift;
+   # https://tools.ietf.org/html/rfc3986#section-2.3
+    $s =~ s/([^A-Za-z0-9-._~])/sprintf("%%%02X", ord($1))/seg;
+    return $s; }
+sub urlencode {
+    my $s = shift;
+    $s =~ s/ /+/g;
+    $s =~ s/([^A-Za-z0-9\+-])/sprintf("%%%02X", ord($1))/seg;
+    return $s; }
+sub urldecode {
+    my $s = shift;
+    $s =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
+    $s =~ s/\+/ /g;
+    return $s; }
+
+die "Browser \"$browser\" not found." unless check_exists_command $browser; 
+use warnings; 
+
+## https://moz.com/blog/the-ultimate-guide-to-the-google-search-parameters
+my $qs; 
+for (@ARGV) { 
+	next if /^\s*$/; # skip if empty or whitespace (not an actual problem, just a kind-of useful thing) 
+	$qs.="+" if $qs; 
+	$qs .= urlencode2 $_;
+} 
+
+if(!$qs) { 
+	print "fatal error. no arguments were non-empty or not whitespace\n";
+	exit;
+}
+unless (fork){ 
+	open STDOUT, ">/dev/null" or die;
+	open STDERR, ">/dev/null" or die; 
+	exec @term, $browser, "$engine$qs";
+}
