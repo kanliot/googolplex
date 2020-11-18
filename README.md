@@ -7,7 +7,7 @@ launch a google.com search result from the command line in any web browser
 or    
 `$ google '"required keywords"' keyword2` 
 
-This script launches the browswer in the background, with the brower specified in the `BROWSER` environment variable.  It should give an error if no arguments.
+This script launches the browser in the background, with the browser specified in the `BROWSER` environment variable.  It should give an error if no arguments.
 
 Should handle characters like `" +="` properly.    
 The main purpose of the script is convenience.  It should allow the user to search for any search term in google.com.   Other scripts don't quite handle spaces or quotes correctly. :) 
