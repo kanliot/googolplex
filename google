@@ -1,4 +1,7 @@
-#!/usr/bin/perl
+#!/usr/bin/perl 
+
+use warnings;
+use strict;
 
 ### call this command with a list of words to pass to google
 my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
@@ -13,6 +16,10 @@ my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
 my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
 $browser = "firefox" unless $browser;  # use "firefox" if not set
 
+if (grep /^-q$/, @ARGV) {
+	$browser='qutebrowser'
+}
+
 my $needs_terminal = $browser =~ /lynx|links|w3m/;
 my @term; 
 if ($needs_terminal) {  # use the rxft to launch lynx
@@ -26,7 +33,8 @@ sub check_exists_command {
 sub urlencode2 {
     my $s = shift;
    # https://tools.ietf.org/html/rfc3986#section-2.3
-    $s =~ s/([^A-Za-z0-9-._~])/sprintf("%%%02X", ord($1))/seg;
+# why this works: https://stackoverflow.com/a/1020299/819596
+    $s =~ s/([^A-Za-z0-9-._~])/sprintf("%%%02X", ord($1))/seg; # always matches utf8 leading, contin bytes
     return $s; }
 sub urlencode {
     my $s = shift;
@@ -41,6 +49,24 @@ sub urldecode {
 
 die "Browser \"$browser\" not found." unless check_exists_command $browser; 
 use warnings; 
+
+=head1 SYNOPSIS
+
+google [options] TERM1 TERM2 \"REQUIRED\ TERM\"
+
+ Options:
+   -h, -help            brief help message
+   -l 			feeling lucky
+
+=cut
+use Getopt::Long; 
+my $lucky;
+my $helpme;
+GetOptions('l', \$lucky,'h',\$helpme,'help',\$helpme);  # no fail 
+$engine ="https://duckduckgo.com/?q=!ducky+"  if $lucky;
+print("This program lets you type a google query in the terminal and launch the \$BROWSER quickly\n"), Getopt::Long::HelpMessage if $helpme or @ARGV < 1;
+
+
 
 ## https://moz.com/blog/the-ultimate-guide-to-the-google-search-parameters
 my $qs; 

@@ -56,6 +56,8 @@ if (@ARGV) {
 if (!fork) { 
 	$_ = $0;
 	if (/kitty/) {
+		open(STDERR, ">/dev/null"); # suppress kitty debugging like [245 12:41:07.861544] [PARSE ERROR] Unrecognized DCS code: 0x7a
+
 		exec #'commandline.pl', 
 		'kitty', qw( -o), "font_size=$points", @out; 
 	}
