@@ -12,4 +12,7 @@ This script launches the browser in the background, with the browser specified i
 Should handle characters like `" +="` properly.    
 The main purpose of the script is convenience.  It should allow the user to search for any search term in google.com.   Other scripts don't quite handle spaces or quotes correctly. :) 
 
+`-l` adds the classic feature of duck duck go: "I'm feeling lucky" which is an instant redirect to the first search result.    
+e.g. `$ google -l kanliot 8mbwebm`
+
 The rxft script is included for launching terminal browsers.  It should work with kitty or rxvt, it's a work in progress. 
