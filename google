@@ -13,8 +13,7 @@ my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
 # no arguments should result in an error
 # copyright 2020 https://github.com/kanliot Apache 2.0 license 
 
-my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
-$browser = "firefox" unless $browser;  # use "firefox" if not set
+my $browser ="xdg-open"; # read in "BROWSER" environment var.
 
 if (grep /^-q$/, @ARGV) {
 	$browser='qutebrowser'
