@@ -1,13 +1,14 @@
 #!/usr/bin/perl 
 
 ### call this command with a list of words to pass to google, so this command launches the browser from the command line.
-my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
+my $engine ="https://www.google.com/search?q="; # "duckduckgo.com/lite?q="
 
 # choose browser to open by setting this environmental variable in your CLI:
 # BROWSER=firefox
 my $defaultbrowser = 'xdg-open'; 
 my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
 $browser = $defaultbrowser unless $browser;  # use "firefox" if not set
+
 
 # yes you can use double quotes.... (if your shell didn't remove them) 
 # the command will open browser with the correct google url, in order to show search results
