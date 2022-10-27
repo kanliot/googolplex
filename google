@@ -1,30 +1,40 @@
 #!/usr/bin/perl 
 
-use warnings;
-use strict;
-
-### call this command with a list of words to pass to google
+### call this command with a list of words to pass to google, so this command launches the browser from the command line.
 my $engine ="www.google.com/search?q="; # "duckduckgo.com/lite?q="
+
 # choose browser to open by setting this environmental variable in your CLI:
 # BROWSER=firefox
+my $defaultbrowser = 'xdg-open'; 
+my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
+$browser = $defaultbrowser unless $browser;  # use "firefox" if not set
 
 # yes you can use double quotes.... (if your shell didn't remove them) 
 # the command will open browser with the correct google url, in order to show search results
 # no arguments should result in an error
 # copyright 2020 https://github.com/kanliot Apache 2.0 license 
 
-my $browser =$ENV{BROWSER}; # read in "BROWSER" environment var.
-$browser = "firefox" unless $browser;  # use "firefox" if not set
 
-if (grep /^-q$/, @ARGV) {
-	$browser='qutebrowser'
-}
+#anliot@maleday:~/music$ time xdg-mime query default text/html
+#anliot@maleday:~/music$ xdg-open program_name.desktop
+	# this is so bad.. people are using python libraries to parse and launch desktop files. the bash code seems to be unworkable. 
 
-my $needs_terminal = $browser =~ /lynx|links|w3m/;
+
+
+# does a redirect- fork exec.  allows you to type quickly- either new tab in existing browser or 
+# might be quicker to go to terminal, right? 
+
+use warnings;
+use strict;
+# note that setting browser to lynx|links|w3m causes a launch of a new terminal
+# my $needs_terminal = $browser =~ /lynx|links|w3m/;
 my @term; 
-if ($needs_terminal) {  # use the rxft to launch lynx
-	@term = "rxft"; 
-}
+#if ($needs_terminal) {  # use the rxft to launch lynx
+#	@term = "rxft" if check_exists_command('rxft'); 
+#}
+# if (grep /^-q$/, @ARGV) {
+#	$browser='qutebrowser'
+#}
 
 sub check_exists_command { 
 	my $check = `sh -c 'command -v $_[0]'`; 
@@ -57,16 +67,44 @@ google [options] TERM1 TERM2 \"REQUIRED\ TERM\"
  Options:
    -h, -help            brief help message
    -l 			feeling lucky
+   -e 			launch duckduckgo in elinks
+ Options must be specified singly, not combined like -hl or -el
+ If the environmental variable $BROWSER is unset, it just launches the url with 'xdg-open' 
 
 =cut
-use Getopt::Long; 
-my $lucky;
-my $helpme;
-GetOptions('l', \$lucky,'h',\$helpme,'help',\$helpme);  # no fail 
-$engine ="https://duckduckgo.com/?q=!ducky+"  if $lucky;
-print("This program lets you type a google query in the terminal and launch the \$BROWSER quickly\n"), Getopt::Long::HelpMessage if $helpme or @ARGV < 1;
 
+our $lucky;
+our $elinks; 
 
+my @tmp; 
+for (@ARGV) { 
+	if ( $_ eq '-h' or $_ eq '--help') { &HELP_MESSAGE}
+	if ( $_ eq '-l') { 
+		$lucky=1;
+		next;
+	}
+	if ( $_ eq '-e') {
+		$elinks=1;
+		next;
+	}
+	push @tmp, $_;
+}
+@ARGV=@tmp;
+$engine ="https://www.duckduckgo.com/?q=!ducky+"  if $lucky;
+if ($elinks) {
+	if ($elinks) { 
+		check_exists_command 'elinks' or die "couldn't call the elinks command";
+		$browser='elinks';
+	}
+	$engine ="https://www.duckduckgo.com/lite?q=";
+	$engine ="https://www.duckduckgo.com/lite?q=!ducky+" if $lucky
+}
+
+sub HELP_MESSAGE { 
+	use Pod::Usage;
+	print("This program lets you type a google query in the terminal and launch the \$BROWSER quickly\n");
+	pod2usage('This program should make searching easier. ');
+ } 
 
 ## https://moz.com/blog/the-ultimate-guide-to-the-google-search-parameters
 my $qs; 
@@ -80,6 +118,8 @@ if(!$qs) {
 	print "fatal error. no arguments were non-empty or not whitespace\n";
 	exit;
 }
+
+exec @term, $browser, "$engine$qs" if $elinks; # current process only
 unless (fork){ 
 	open STDOUT, ">/dev/null" or die;
 	open STDERR, ">/dev/null" or die; 
